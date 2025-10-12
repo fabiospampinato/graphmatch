@@ -57,7 +57,7 @@ describe ( 'Graphmatch', it => {
 
     try {
 
-      const re = graphmatch.compile ( node );
+      graphmatch.compile ( node );
 
     } catch ( error ) {
 
@@ -101,6 +101,29 @@ describe ( 'Graphmatch', it => {
     t.false ( graphmatch ( NODE, 'foo/bar/_', { partial: true } ) );
     t.false ( graphmatch ( NODE, 'foo/qux_', { partial: true } ) );
     t.false ( graphmatch ( NODE, 'foo/qux/_', { partial: true } ) );
+
+  });
+
+  it ( 'supports nodes with multiple parents', t => {
+
+    const Z = {
+      regex: /z/
+    };
+    const NODE = {
+      children: [
+        {
+          regex: /a/,
+          children: [Z]
+        },
+        {
+          regex: /b/,
+          children: [Z]
+        }
+      ]
+    };
+
+    t.true ( graphmatch ( NODE, 'az' ) );
+    t.true ( graphmatch ( NODE, 'bz' ) );
 
   });
 
