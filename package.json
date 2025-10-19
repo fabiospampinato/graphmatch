@@ -2,7 +2,7 @@
   "name": "graphmatch",
   "repository": "github:fabiospampinato/graphmatch",
   "description": "A low-level utility for matching a string against a directed acyclic graph of regexes.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "main": "dist/index.js",
   "exports": "./dist/index.js",
