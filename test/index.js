@@ -104,6 +104,85 @@ describe ( 'Graphmatch', it => {
 
   });
 
+  it ( 'can match partially, with coarse-grained partiality', t => {
+
+    const node = { // Coarse-grained partiality
+      regex: /a/,
+      children: [
+        {
+          regex: /b/,
+          children: [
+            {
+              regex: /_/,
+              children: [
+                {
+                  regex: /c/,
+                  children: [
+                    {
+                      regex: /d/
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    };
+
+    t.true ( graphmatch ( node, '', { partial: true } ) );
+    t.true ( graphmatch ( node, 'a', { partial: true } ) );
+    t.true ( graphmatch ( node, 'ab', { partial: true } ) );
+    t.true ( graphmatch ( node, 'ab_', { partial: true } ) );
+    t.true ( graphmatch ( node, 'ab_c', { partial: true } ) );
+    t.true ( graphmatch ( node, 'ab_cd', { partial: true } ) );
+
+  });
+
+  it ( 'can match partially, with fine-grained partiality', t => {
+
+    const node = { // Fine-grained partiality
+      partial: false,
+      regex: /a/,
+      children: [
+        {
+          partial: false,
+          regex: /b/,
+          children: [
+            {
+              partial: true,
+              regex: /_/,
+              children: [
+                {
+                  partial: false,
+                  regex: /c/,
+                  children: [
+                    {
+                      partial: false,
+                      regex: /d/
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    };
+
+    for ( const partial of [true, false] ) {
+
+      t.false ( graphmatch ( node, '', { partial } ) );
+      t.false ( graphmatch ( node, 'a', { partial } ) );
+      t.true ( graphmatch ( node, 'ab', { partial } ) );
+      t.true ( graphmatch ( node, 'ab_', { partial } ) );
+      t.false ( graphmatch ( node, 'ab_c', { partial } ) );
+      t.true ( graphmatch ( node, 'ab_cd', { partial } ) );
+
+    }
+
+  });
+
   it ( 'supports arbitrary horizontal size without blowing up the call stack', t => {
 
     const chars = new Array ( 1_000_000 ).fill ( '' ).map ( ( _, i ) => String.fromCodePoint ( 50_000 + i ) );

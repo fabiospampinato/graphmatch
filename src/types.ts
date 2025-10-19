@@ -3,10 +3,12 @@
 
 type Node =
   {
+    partial?: boolean,
     regex: RegExp
     children?: Node[]
   } |
   {
+    partial?: boolean,
     regex?: RegExp,
     children: Node[]
   };

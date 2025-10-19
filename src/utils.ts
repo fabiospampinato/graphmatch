@@ -66,11 +66,13 @@ const getNodeSourceWithCache = ( node: Node, partial: boolean, cache: Map<Node, 
 
   if ( cached !== undefined ) return cached;
 
+  const isNodePartial = node.partial ?? partial;
+
   let source = '';
 
   if ( node.regex ) {
 
-    source += partial ? '(?:$|' : '';
+    source += isNodePartial ? '(?:$|' : '';
     source += node.regex.source;
 
   }
@@ -81,9 +83,10 @@ const getNodeSourceWithCache = ( node: Node, partial: boolean, cache: Map<Node, 
 
     if ( children?.length ) {
 
-      const needsWrapperGroup = ( children.length > 1 ) || ( partial && !source.length );
+      const isSomeChildNonPartial = node.children.some ( child => !child.regex || !( child.partial ?? partial ) );
+      const needsWrapperGroup = ( children.length > 1 ) || ( isNodePartial && ( !source.length || isSomeChildNonPartial ) );
 
-      source += needsWrapperGroup ? partial ? '(?:$|' : '(?:' : '';
+      source += needsWrapperGroup ? isNodePartial ? '(?:$|' : '(?:' : '';
       source += children.join ( '|' );
       source += needsWrapperGroup ? ')' : '';
 
@@ -93,7 +96,7 @@ const getNodeSourceWithCache = ( node: Node, partial: boolean, cache: Map<Node, 
 
   if ( node.regex ) {
 
-    source += partial ? ')' : '';
+    source += isNodePartial ? ')' : '';
 
   }
 
