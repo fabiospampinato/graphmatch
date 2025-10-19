@@ -131,6 +131,24 @@ describe ( 'Graphmatch', it => {
 
   });
 
+  it ( 'supports deduplicating identical alternations', t => {
+
+    const node = {
+      children: [
+        { regex: /a/ },
+        { regex: /a/ },
+        { regex: /a/ }
+      ]
+    };
+
+    const re = graphmatch.compile ( node );
+
+    t.true ( re instanceof RegExp );
+    t.is ( re.source, '^(?:a)$' );
+    t.is ( re.flags, '' );
+
+  });
+
   it ( 'supports nodes with multiple parents', t => {
 
     const Z = {

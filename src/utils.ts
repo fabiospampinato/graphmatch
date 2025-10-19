@@ -77,7 +77,7 @@ const getNodeSourceWithCache = ( node: Node, partial: boolean, cache: Map<Node, 
 
   if ( node.children?.length ) {
 
-    const children = node.children.map ( node => getNodeSourceWithCache ( node, partial, cache ) ).filter ( Boolean );
+    const children = uniq ( node.children.map ( node => getNodeSourceWithCache ( node, partial, cache ) ).filter ( Boolean ) );
 
     if ( children?.length ) {
 
@@ -119,6 +119,12 @@ const getNodeSource = ( node: Node, partial: boolean ): string => {
   }
 
   return '';
+
+};
+
+const uniq = <T> ( values: T[] ): T[] => {
+
+  return Array.from ( new Set ( values ) );
 
 };
 
