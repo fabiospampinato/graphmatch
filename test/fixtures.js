@@ -7,7 +7,7 @@ const toTree = node => {
   return { regex, children };
 };
 
-const NODE = { // foo/**/{bar/baz,qux}/*.js
+const NODE = { // foo/**/{bar/baz,qux}/*.js, kinda, the globstar works differently here when matching partially
   regex: /foo/,
   children: [
     {
@@ -61,7 +61,7 @@ const NODE = { // foo/**/{bar/baz,qux}/*.js
   ]
 };
 
-const NODE_ALT = toTree ( // foo/**/{bar/baz,qux}/*.js (same)
+const NODE_ALT = toTree ( // foo/**/{bar/baz,qux}/*.js (same, kinda)
   [/foo/, [
     [/[\\\/]+/, [
       [/(?:[^\\\/]+[\\\/]+)*?/, [
