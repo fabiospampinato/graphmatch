@@ -104,6 +104,33 @@ describe ( 'Graphmatch', it => {
 
   });
 
+  it ( 'supports arbitrary horizontal size without blowing up the call stack', t => {
+
+    const chars = new Array ( 1_000_000 ).fill ( '' ).map ( ( _, i ) => String.fromCodePoint ( 50_000 + i ) );
+    const node = { children: chars.map ( char => ({ regex: new RegExp ( char ) }) ) };
+    const re = graphmatch.compile ( node );
+
+    t.true ( re instanceof RegExp );
+    t.is ( re.source, `^(?:(?:${chars.join ( '|' )}))$` );
+    t.is ( re.flags, '' );
+
+  });
+
+  it ( 'supports arbitrary vertical size without blowing up the call stack', t => {
+
+    let node = { children: [] };
+    for ( let i = 0; i < 100_000; i++ ) {
+      node = { regex: /a/, children: [node] };
+    }
+
+    const re = graphmatch.compile ( node );
+
+    t.true ( re instanceof RegExp );
+    t.is ( re.source, `^(?:${'a'.repeat ( 100_000 )})$` );
+    t.is ( re.flags, '' );
+
+  });
+
   it ( 'supports nodes with multiple parents', t => {
 
     const Z = {

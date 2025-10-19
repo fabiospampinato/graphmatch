@@ -5,31 +5,66 @@ import type {Node} from './types';
 
 /* MAIN */
 
+const getNodes = ( node: Node ): Node[] => {
+
+  const nodes = new Set<Node>();
+  const queue = [node];
+
+  for ( let i = 0; i < queue.length; i++ ) {
+
+    const node = queue[i];
+
+    if ( nodes.has ( node ) ) continue;
+
+    nodes.add ( node );
+
+    const {children} = node;
+
+    if ( !children?.length ) continue;
+
+    for ( let ci = 0, cl = children.length; ci < cl; ci++ ) {
+
+      queue.push ( children[ci] );
+
+    }
+
+  }
+
+  return Array.from ( nodes );
+
+};
+
 const getNodeFlags = ( node: Node ): string => {
 
   let flags = '';
 
-  visitNode ( node, node => {
+  const nodes = getNodes ( node );
 
-    if ( !node.regex ) return;
+  for ( let i = 0, l = nodes.length; i < l; i++ ) { // From root to leaves
+
+    const node = nodes[i];
+
+    if ( !node.regex ) continue;
 
     const nodeFlags = node.regex.flags;
 
     flags ||= nodeFlags;
 
-    if ( flags !== nodeFlags ) {
+    if ( flags === nodeFlags ) continue;
 
-      throw new Error ( `Inconsistent RegExp flags used: "${flags}" and "${nodeFlags}"` );
+    throw new Error ( `Inconsistent RegExp flags used: "${flags}" and "${nodeFlags}"` );
 
-    }
-
-  });
+  }
 
   return flags;
 
 };
 
-const getNodeSource = ( node: Node, partial: boolean ): string => {
+const getNodeSourceWithCache = ( node: Node, partial: boolean, cache: Map<Node, string> ): string => {
+
+  const cached = cache.get ( node );
+
+  if ( cached !== undefined ) return cached;
 
   let source = '';
 
@@ -42,9 +77,9 @@ const getNodeSource = ( node: Node, partial: boolean ): string => {
 
   if ( node.children?.length ) {
 
-    const children = node.children.map ( node => getNodeSource ( node, partial ) ).filter ( Boolean );
+    const children = node.children.map ( node => getNodeSourceWithCache ( node, partial, cache ) ).filter ( Boolean );
 
-    if ( children.length ) {
+    if ( children?.length ) {
 
       const needsWrapperGroup = ( children.length > 1 ) || ( partial && !source.length );
 
@@ -62,22 +97,31 @@ const getNodeSource = ( node: Node, partial: boolean ): string => {
 
   }
 
+  cache.set ( node, source );
+
   return source;
 
 };
 
-const visitNode = ( node: Node, visitor: ( node: Node ) => void ): void => {
+const getNodeSource = ( node: Node, partial: boolean ): string => {
 
-  visitor ( node );
+  const cache = new Map<Node, string>();
+  const nodes = getNodes ( node );
 
-  node.children?.forEach ( node => {
+  for ( let i = nodes.length - 1; i >= 0; i-- ) { // From leaves to root
 
-    visitNode ( node, visitor );
+    const source = getNodeSourceWithCache ( nodes[i], partial, cache );
 
-  });
+    if ( i > 0 ) continue;
+
+    return source;
+
+  }
+
+  return '';
 
 };
 
 /* EXPORT */
 
-export {getNodeFlags, getNodeSource, visitNode};
+export {getNodeFlags, getNodeSource};
