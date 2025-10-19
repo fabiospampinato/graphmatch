@@ -1,10 +1,15 @@
 
 /* MAIN */
 
-type Node = {
-  regex?: RegExp,
-  children?: Node[]
-};
+type Node =
+  {
+    regex: RegExp
+    children?: Node[]
+  } |
+  {
+    regex?: RegExp,
+    children: Node[]
+  };
 
 type Options = {
   partial?: boolean
